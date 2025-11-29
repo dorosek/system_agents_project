@@ -12,13 +12,26 @@ public class MFN {
 
     public MFN(int m, int[] W, double[] C, int[] L, double[] R, double[] rho)
     {
+        int size = W.length;
+
+        if (C.length != size || L.length != size || R.length != size || rho.length != size)
+        {
+            throw new IllegalArgumentException();
+        }
+        for (int i = 0; i < size; i++)
+        {
+            if (R[i] < 0 || R[i] > 1 || rho[i] < 0 || rho[i] > 1)
+            {
+                throw new IllegalArgumentException();
+            }
+
+        }
         this.m = m;
         this.W = W;
         this.C = C;
         this.L = L;
         this.R = R;
         this.rho = rho;
-        int size = R.length;
         this.beta = new double[size];
         for(int i = 0; i < size; i++)
         {
