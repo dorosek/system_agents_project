@@ -1,4 +1,6 @@
-import java.util.ArrayList;
+import java.util.*;
+import java.io.*;
+import java.math.*;
 
 public class MFN {
     private int m;
@@ -69,6 +71,31 @@ public class MFN {
     public ArrayList<int[]> getMps() {
         return Mps;
     }
+    public void getMPs(String fileName) {
+        Mps = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileName)))
+        {
+            String line;
+
+            while ((line = br.readLine()) != null) {
+
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+
+                String[] tokens = line.split(",");
+                int[] row = new int[tokens.length];
+
+                for (int i = 0; i < tokens.length; i++) {
+                    row[i] = Integer.parseInt(tokens[i].trim());
+                }
+
+                Mps.add(row);
+            }
+
+        }
+    }
     public void setM(int m) {
         this.m = m;
     }
@@ -105,9 +132,28 @@ public class MFN {
         return result;
     }
 
+    public static long doubleFactorial(int n)
+    {
+        long result = 1;
+        for (int i = n; i > 0; i -= 2) {
+            result *= i;
+        }
+        return result;
+    }
+
     public static long binomialCoefficient(int n, int k)
     {
         return factorial(n)/(factorial(k) * factorial(n-k));
+    }
+
+    static double normalCDF(double z)
+    {
+        double sum = 0;
+        for(int i = 1; i <= 100; i++)
+        {
+            sum += (Math.pow(z, 2*i+1)/doubleFactorial(2*i+1));
+        }
+        return 0.5 + (1.0/Math.sqrt(2*Math.PI)) * Math.pow(Math.E, -(Math.pow(z, 2)/2)) * sum;
     }
 
 }
