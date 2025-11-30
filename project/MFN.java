@@ -10,7 +10,7 @@ public class MFN {
     private double[] rho;
     private double[] beta;
     private ArrayList<int[]> Mps;
-    private static Map<Integer, Long> factorialCache;
+    private static TreeMap<Integer, Long> factorialCache;
 
     public MFN(int m, int[] W, double[] C, int[] L, double[] R, double[] rho)
     {
@@ -40,6 +40,8 @@ public class MFN {
             this.beta[i] = 1 + (rho[i]*(1-R[i])/R[i]);
         }
         factorialCache = new TreeMap<>();
+        factorialCache.put(0, 1L);
+        factorialCache.put(1, 1L);
     }
     public int getM() {
         return m;
@@ -101,14 +103,19 @@ public class MFN {
     }
 
     public static long factorial(int n) {
+        // If factorial was already calculated, retrieve it
         if (factorialCache.containsKey(n)){
             return factorialCache.get(n);
         }
-        long result = 1;
-        for (int i = 1; i <= n; i++) {
+        // If n is not it factorialCache -> we have not calculated it yet
+        int nearestLowerFactorialKey = factorialCache.lastKey();
+        // Get value of the factorial (highest in cache)
+        long result = factorialCache.get(nearestLowerFactorialKey);
+        // Calculate next factorials and save them in cache
+        for (int i = nearestLowerFactorialKey + 1; i <= n; i++) {
             result *= i;
+            factorialCache.put(i, result);
         }
-        factorialCache.put(n, result);
         return result;
     }
 
