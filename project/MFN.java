@@ -11,6 +11,7 @@ public class MFN {
     private double[] rho;
     private double[] beta;
     private ArrayList<int[]> Mps;
+    private static TreeMap<Integer, Long> factorialCache;
 
     public MFN(int m, int[] W, double[] C, int[] L, double[] R, double[] rho)
     {
@@ -39,6 +40,9 @@ public class MFN {
         {
             this.beta[i] = 1 + (rho[i]*(1-R[i])/R[i]);
         }
+        factorialCache = new TreeMap<>();
+        factorialCache.put(0, 1L);
+        factorialCache.put(1, 1L);
     }
     public int getM() {
         return m;
