@@ -5,14 +5,14 @@ import java.math.*;
 import java.util.TreeMap;
 
 public class MFN {
-    private int m;
-    private int[] W;
-    private double[] C;
-    private int[] L;
-    private double[] R;
-    private double[] rho;
-    private double[] beta;
-    private ArrayList<int[]> Mps;
+    private static int m;
+    private static int[] W;
+    private static double[] C;
+    private static int[] L;
+    private static double[] R;
+    private static double[] rho;
+    private static double[] beta;
+    private static ArrayList<int[]> Mps;
     private static TreeMap<Integer, Long> factorialCache;
 
     public MFN(int m, int[] W, double[] C, int[] L, double[] R, double[] rho)
@@ -164,7 +164,7 @@ public class MFN {
         return factorial(n)/(factorial(k) * factorial(n-k));
     }
 
-    static double normalCDF(double z)
+    public static double normalCDF(double z)
     {
         double sum = 0;
         for(int i = 1; i <= 100; i++)
@@ -174,4 +174,92 @@ public class MFN {
         return 0.5 + (1.0/Math.sqrt(2*Math.PI)) * Math.pow(Math.E, -(Math.pow(z, 2)/2)) * sum;
     }
 
+    // Formula 1
+    private static double prCapacityState(int w, double r, double beta, int k){
+        if (k == 0){
+            return 1 - (1 / beta) * (1 - Math.pow(1 - r * beta, w));
+        }
+        else{
+            return (1 / beta) * binomialCoefficient(w, k) * Math.pow(r * beta, k) * Math.pow(1 - r * beta, w - k);
+        }
+    }
+
+    public double[][] calculcatePRCapacityStates(){
+        double[][] probs = new double[W.length][];
+        for (int i = 0; i < W.length; i++){
+            probs[i] = new double[W[i] + 1];
+            for (int j = 0; j <= W[i]; j++){
+                probs[i][j] = prCapacityState(W[i], R[i], beta[i], j);
+            }
+        }
+        return probs;
+    }
+
+    public double[][] CDF(double[][] arPMF){
+        double[][] cumProbs =  new double[W.length][];
+        for (int i = 0; i < arPMF.length; i++){
+            cumProbs[i] = arPMF[i];
+            for (int j = 1; j < arPMF[i].length; j++){
+                cumProbs[i][j] = arPMF[i][j] + cumProbs[i][j-1];
+            }
+        }
+        return cumProbs;
+    }
+
+    // Formula 3
+    // tau(P, d, X)
+    public double[] tau(double d){
+        double[] maxFlow = getMaxFlow(getMps(), getW(), getC());
+        double[] pathTime = timeOfPath(getMps(), getL());
+        double[] result = new double[getMps().size()];
+        for (int i = 0; i < getMps().size(); i++){
+            System.out.println("L(P) = " + pathTime[i] + " C(P,X) = " + maxFlow[i]);
+            if (maxFlow[i] > 0){
+                result[i] = pathTime[i] + (d / maxFlow[i]);
+            }
+            else{
+                result[i] = Double.POSITIVE_INFINITY;
+            }
+        }
+        return result;
+    }
+
+    // Formula 4
+    // L(P)
+    private double[] timeOfPath(ArrayList<int[]> mps, int[] l){
+        double[] result = new double[mps.size()];
+        double l_summed = 0.0;
+        for (int i = 0; i < mps.size(); i++){
+            for (int j = 0; j < mps.get(i).length; j++){
+                l_summed += l[mps.get(i)[j] - 1];
+            }
+            result[i] = l_summed;
+            l_summed = 0.0;
+        }
+        return result;
+    }
+
+    // Formula 5
+    // C(P, X)
+    private static double[] getMaxFlow(ArrayList<int[]> mps, int[] w, double[] c){
+        double[] result = new double[mps.size()];
+        double minCapacity = Double.MAX_VALUE;
+        for (int i = 0; i < mps.size(); i++){
+            for (int j = 0; j < mps.get(i).length; j++){
+                if (w[mps.get(i)[j] - 1] * c[mps.get(i)[j] - 1] < minCapacity){
+                    minCapacity = w[mps.get(i)[j] - 1] * c[mps.get(i)[j] - 1];
+                }
+            }
+            result[i] = minCapacity;
+            minCapacity = Double.MAX_VALUE;
+        }
+        return result;
+    }
+
+    // Formula 8
+    // T(d, X)
+    public double getLowestTransmissionTime(double d){
+        double[] times = tau(d);
+        return Arrays.stream(times).min().getAsDouble();
+    }
 }
