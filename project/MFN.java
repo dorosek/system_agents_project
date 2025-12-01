@@ -2,6 +2,8 @@ import java.util.*;
 import java.io.*;
 import java.math.*;
 
+import java.util.TreeMap;
+
 public class MFN {
     private int m;
     private int[] W;
@@ -75,7 +77,7 @@ public class MFN {
     public ArrayList<int[]> getMps() {
         return Mps;
     }
-    public void getMPs(String fileName) {
+    public void getMPs(String fileName) throws FileNotFoundException {
         Mps = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(fileName)))
@@ -98,6 +100,8 @@ public class MFN {
                 Mps.add(row);
             }
 
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
     public void setM(int m) {
@@ -129,10 +133,20 @@ public class MFN {
     }
 
     public static long factorial(int n) {
-        long result = 1;
-        for (int i = 1; i <= n; i++) {
-            result *= i;
+        // If factorial was already calculated, retrieve it
+        if (factorialCache.containsKey(n)) {
+            return factorialCache.get(n);
         }
+        // If n is not it factorialCache -> we have not calculated it yet
+        int nearestLowerFactorialKey = factorialCache.lastKey();
+        // Get value of the factorial (highest in cache)
+        long result = factorialCache.get(nearestLowerFactorialKey);
+        // Calculate next factorials and save them in cache
+        for (int i = nearestLowerFactorialKey + 1; i <= n; i++) {
+            result *= i;
+            factorialCache.put(i, result);
+        }
+        factorialCache.put(n, result);
         return result;
     }
 
