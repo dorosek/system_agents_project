@@ -69,9 +69,36 @@ public class Main {
         double[][] cumProb = mfn.CDF(prs);
         for (double[] pr : cumProb){
             for(double val : pr) {
-                System.out.print(val + " ");
+                System.out.print("CDF " + val + " ");
             }
             System.out.println();
         }
+
+        double res = mfn.normalICDF(0.99);
+        System.out.println("ICDF : " + res);
+
+//        mfn.test();
+        System.out.println(mfn.worstCaseSampleSize(0.01, 0.01));
+
+        double[][] ssv = mfn.randomSSV(100, cumProb);
+        System.out.println("========================================================================");
+        double a = 0, b = 0, c = 0, d = 0, e = 0;
+        for (double[] pr : ssv) {
+            a += pr[0];
+            b += pr[1];
+            c += pr[2];
+            d += pr[3];
+            e += pr[4];
+//            for(double val : pr) {
+////                System.out.print(val + " ");
+//            }
+//            System.out.println();
+        }
+        System.out.println("a = " + a/100);
+        System.out.println("b = " + b/100);
+        System.out.println("c = " + c/100);
+        System.out.println("d = " + d/100);
+        System.out.println("e = " + e/100);
+        System.out.println("========================================================================");
     }
 }

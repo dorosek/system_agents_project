@@ -1,3 +1,4 @@
+import javax.lang.model.type.NullType;
 import java.util.*;
 import java.io.*;
 import java.math.*;
@@ -150,6 +151,12 @@ public class MFN {
         return result;
     }
 
+    public void test(){
+        for (int i = 0; i <= 50; i++){
+            System.out.println("Factorial: " + i + " = " + factorial(i));
+        }
+    }
+
     public static long doubleFactorial(int n)
     {
         long result = 1;
@@ -167,11 +174,42 @@ public class MFN {
     public static double normalCDF(double z)
     {
         double sum = 0;
-        for(int i = 1; i <= 100; i++)
+        // TODO n = 100 a nie 15
+        for(int i = 1; i <= 17; i++)
         {
-            sum += (Math.pow(z, 2*i+1)/doubleFactorial(2*i+1));
+            sum += (Math.pow(z, 2*i-1)/doubleFactorial(2*i-1));
         }
         return 0.5 + (1.0/Math.sqrt(2*Math.PI)) * Math.pow(Math.E, -(Math.pow(z, 2)/2)) * sum;
+    }
+
+    private static double derivativeCDF(double z){
+        return Math.pow(Math.E, -Math.pow(z, 2) / 2) / Math.sqrt(2 * Math.PI);
+    }
+
+    public double normalICDF(double u){
+        double x = 0.0;
+        double tol = 0.1;
+        int max_iter = 100;
+        for (int i = 0; i <= max_iter; i++){
+            double fx = normalCDF(x) - u;
+            double fpx = derivativeCDF(x);
+
+            if (fpx == 0){
+                System.out.println("Derivative is zero. No convergence possible.");
+                return x;
+            }
+
+            double x_new = x - fx / fpx;
+
+            if (Math.abs(x_new - x) < tol) {
+                System.out.println("Iters : " + i);
+                return x_new;
+            }
+
+            x = x_new;
+        }
+        System.out.println("Method did not converge");
+        return x;
     }
 
     // Formula 1
@@ -261,5 +299,28 @@ public class MFN {
     public double getLowestTransmissionTime(double d){
         double[] times = tau(d);
         return Arrays.stream(times).min().getAsDouble();
+    }
+
+    // Formula 12b
+    public int worstCaseSampleSize(double epsilon, double delta){
+        return (int) Math.pow(normalICDF(1 - (delta / 2)) / (2 * epsilon), 2);
+    }
+
+    public double[][] randomSSV(int N, double[][] arCDF){
+        Random r1 = new Random(System.currentTimeMillis());
+        double[][] result = new double[N][arCDF.length];
+        for (int i = 0; i < N; i++){
+            for  (int j = 0; j < arCDF.length; j++){
+                // TODO spytac sie czy mozna uzyc random
+                double random = r1.nextDouble();
+                for (int k = 0; k < arCDF[j].length; k++){
+                    if (arCDF[j][k] <= random){
+                        // TODO moze zmienic
+                        result[i][j] = (k + 1) * C[j];
+                    }
+                }
+            }
+        }
+        return result;
     }
 }
