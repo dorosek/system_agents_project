@@ -54,19 +54,19 @@ public class SSVGenerator extends Agent {
         System.out.println("N = " + N);
 
         SSV = mfn.randomSSV(N, mfn.CDF(mfn.calculcatePRCapacityStates()));
-        sendSSVMessage(W, C, L, R, rho, csvPath, SSV);
+        sendSSVMessage(W, C, L, R, rho, csvPath, SSV, N);
     }
 
-    private void sendSSVMessage(int[] W, double[] C, int[] L, double[] R, double[] rho, String csvPath, double[][] SSV) {
+    private void sendSSVMessage(int[] W, double[] C, int[] L, double[] R, double[] rho, String csvPath, double[][] SSV, int N) {
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
         msg.addReceiver(new AID("TT", AID.ISLOCALNAME));
         msg.setConversationId("SSV");
-        msg.setContent(buildPayload(W, C, L, R, rho, csvPath, SSV));
+        msg.setContent(buildPayload(W, C, L, R, rho, csvPath, SSV, N));
         send(msg);
     }
 
 
-    private String buildPayload(int[] W, double[] C, int[] L, double[] R, double[] rho, String csvPath, double[][] SSV)
+    private String buildPayload(int[] W, double[] C, int[] L, double[] R, double[] rho, String csvPath, double[][] SSV, int N)
      {
         StringBuilder sb = new StringBuilder();
         sb.append("W=").append(arrayToCSV(W)).append("\n");
@@ -74,6 +74,7 @@ public class SSVGenerator extends Agent {
         sb.append("L=").append(arrayToCSV(L)).append("\n");
         sb.append("R=").append(arrayToCSV(R)).append("\n");
         sb.append("rho=").append(arrayToCSV(rho)).append("\n");
+        sb.append("N=").append(String.valueOf(N)).append("\n");
         sb.append("MPsPath=").append(csvPath).append("\n");
         sb.append("SSV:\n");
         

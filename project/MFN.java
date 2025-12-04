@@ -5,8 +5,6 @@ import java.util.*;
 import java.io.*;
 import java.math.*;
 
-import java.util.TreeMap;
-
 public class MFN {
     private static int m;
     private static int[] W;
@@ -248,12 +246,12 @@ public class MFN {
 
     // Formula 3
     // tau(P, d, X)
-    public double[] tau(double d){
-        double[] maxFlow = getMaxFlow(getMps(), getW(), getC());
+    public double[] tau(double d, double[] X){
+        double[] maxFlow = getMaxFlow(getMps(), X);
         double[] pathTime = timeOfPath(getMps(), getL());
         double[] result = new double[getMps().size()];
         for (int i = 0; i < getMps().size(); i++){
-            System.out.println("L(P) = " + pathTime[i] + " C(P,X) = " + maxFlow[i]);
+            // System.out.println("L(P) = " + pathTime[i] + " C(P,X) = " + maxFlow[i]);
             if (maxFlow[i] > 0){
                 result[i] = pathTime[i] + (d / maxFlow[i]);
             }
@@ -281,13 +279,13 @@ public class MFN {
 
     // Formula 5
     // C(P, X)
-    private static double[] getMaxFlow(ArrayList<int[]> mps, int[] w, double[] c){
+    private static double[] getMaxFlow(ArrayList<int[]> mps, double[] X){
         double[] result = new double[mps.size()];
         double minCapacity = Double.MAX_VALUE;
         for (int i = 0; i < mps.size(); i++){
             for (int j = 0; j < mps.get(i).length; j++){
-                if (w[mps.get(i)[j] - 1] * c[mps.get(i)[j] - 1] < minCapacity){
-                    minCapacity = w[mps.get(i)[j] - 1] * c[mps.get(i)[j] - 1];
+                if (X[mps.get(i)[j] - 1] < minCapacity){
+                    minCapacity = X[mps.get(i)[j] - 1];
                 }
             }
             result[i] = minCapacity;
@@ -298,10 +296,11 @@ public class MFN {
 
     // Formula 8
     // T(d, X)
-    public double getLowestTransmissionTime(double d){
-        double[] times = tau(d);
+    public double getLowestTransmissionTime(double d, double[] X){
+        double[] times = tau(d, X);
         return Arrays.stream(times).min().getAsDouble();
     }
+
 
     // Formula 12b
     public int worstCaseSampleSize(double epsilon, double delta){
