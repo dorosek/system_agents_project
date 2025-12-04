@@ -1,3 +1,5 @@
+package examples.project;
+
 import javax.lang.model.type.NullType;
 import java.util.*;
 import java.io.*;
