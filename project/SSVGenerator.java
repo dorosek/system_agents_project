@@ -3,7 +3,6 @@ package examples.project;
 import jade.core.Agent;
 import jade.lang.acl.ACLMessage;
 import jade.core.AID;
-
 import javax.swing.*;
 import java.util.Arrays;
 
@@ -28,6 +27,35 @@ public class SSVGenerator extends Agent {
         }
 
         SwingUtilities.invokeLater(() -> new SSVGeneratorGui(this));
+        
+        System.out.println("Hallo! SSVGenerator-agent " + getAID().getName() + " is ready.");
+
+
+        addBehaviour(new jade.core.behaviours.CyclicBehaviour() {
+        @Override
+        public void action() {
+
+            ACLMessage msg = receive(
+                jade.lang.acl.MessageTemplate.MatchConversationId("SSV")
+            );
+
+            if (msg != null && msg.getPerformative() == ACLMessage.INFORM) {
+
+                String content = msg.getContent();
+
+                if (content.startsWith("RELIABILITY=")) {
+                    String value = content.substring("RELIABILITY=".length());
+                    System.out.println("Estimated network reliability is equal to  = " + value);
+                }
+
+                System.out.println("SSVGenerator-agent " + getAID().getName() + " terminating.");
+
+                doDelete(); 
+            } else {
+                block();
+            }
+        }
+    });
     }
 
     public void buildMFNAndPrint(int m, int[] W, double[] C, int[] L, double[] R, double[] rho, String csvPath) {
@@ -41,6 +69,8 @@ public class SSVGenerator extends Agent {
             System.out.println("Error reading MPs file: " + e.getMessage());
             return;
         }
+        N = mfn.worstCaseSampleSize(epsilon, delta);
+        System.out.println("The minimum number of iterations is equal to " + N);
 
         System.out.println("Parameters:");
         System.out.println("W = " + Arrays.toString(mfn.getW()));
@@ -48,18 +78,19 @@ public class SSVGenerator extends Agent {
         System.out.println("L = " + Arrays.toString(mfn.getL()));
         System.out.println("R = " + Arrays.toString(mfn.getR()));
         System.out.println("rho = " + Arrays.toString(mfn.getRho()));
-        System.out.println("beta = " + Arrays.toString(mfn.getBeta()));
-
-        N = mfn.worstCaseSampleSize(epsilon, delta);
-        System.out.println("N = " + N);
+        // System.out.println("beta = " + Arrays.toString(mfn.getBeta()));
 
         SSV = mfn.randomSSV(N, mfn.CDF(mfn.calculcatePRCapacityStates()));
         sendSSVMessage(W, C, L, R, rho, csvPath, SSV, N);
+        System.out.println(N + " random SSVs have been generated!");
     }
 
     private void sendSSVMessage(int[] W, double[] C, int[] L, double[] R, double[] rho, String csvPath, double[][] SSV, int N) {
         ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
+        AID TT = new AID("TT", AID.ISLOCALNAME);
         msg.addReceiver(new AID("TT", AID.ISLOCALNAME));
+        System.out.println("Found the following transmission times computing agent:");
+        System.out.println(TT.getName());
         msg.setConversationId("SSV");
         msg.setContent(buildPayload(W, C, L, R, rho, csvPath, SSV, N));
         send(msg);

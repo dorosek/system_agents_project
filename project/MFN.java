@@ -151,7 +151,7 @@ public class MFN {
         return result;
     }
 
-    public void test(){
+    public void test(){ //TODO usuniecie
         for (int i = 0; i <= 50; i++){
             System.out.println("Factorial: " + i + " = " + factorial(i));
         }
@@ -194,21 +194,18 @@ public class MFN {
             double fx = normalCDF(x) - u;
             double fpx = derivativeCDF(x);
 
-            if (fpx == 0){
-                System.out.println("Derivative is zero. No convergence possible.");
+            if (fpx == 0){ //no converge
                 return x;
             }
 
             double x_new = x - fx / fpx;
 
             if (Math.abs(x_new - x) < tol) {
-                System.out.println("Iters : " + i);
                 return x_new;
             }
 
             x = x_new;
         }
-        System.out.println("Method did not converge");
         return x;
     }
 
