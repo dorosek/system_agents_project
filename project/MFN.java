@@ -174,10 +174,9 @@ public class MFN {
     public static double normalCDF(double z)
     {
         double sum = 0;
-        // TODO n = 100 a nie 15
-        for(int i = 1; i <= 17; i++)
+        for(int i = 1; i <= 25; i++)
         {
-            sum += (Math.pow(z, 2*i-1)/doubleFactorial(2*i-1));
+            sum += BigDecimal.valueOf(Math.pow(z, 2*i-1)).divide(BigDecimal.valueOf(doubleFactorial(2*i-1)), RoundingMode.HALF_EVEN).doubleValue();
         }
         return 0.5 + (1.0/Math.sqrt(2*Math.PI)) * Math.pow(Math.E, -(Math.pow(z, 2)/2)) * sum;
     }
@@ -188,8 +187,10 @@ public class MFN {
 
     public double normalICDF(double u){
         double x = 0.0;
-        double tol = 0.1;
-        int max_iter = 100;
+        double tol = 10e-10;
+        int max_iter = 10000;
+        // double up = 10;
+        // double down = -10;
         for (int i = 0; i <= max_iter; i++){
             double fx = normalCDF(x) - u;
             double fpx = derivativeCDF(x);
@@ -206,6 +207,16 @@ public class MFN {
 
             x = x_new;
         }
+        // while(Math.abs(normalCDF(x) - u) > tol){
+        //     System.out.println(x + " " + normalCDF(x) + " " + u );
+        //     if(normalCDF(x) > u){
+        //         down = x;
+        //     }
+        //     else{
+        //         up = x;
+        //     }
+        //     x = (up + down)/2.0;
+        // }
         return x;
     }
 
@@ -248,7 +259,6 @@ public class MFN {
         double[] pathTime = timeOfPath(getMps(), getL());
         double[] result = new double[getMps().size()];
         for (int i = 0; i < getMps().size(); i++){
-            // System.out.println("L(P) = " + pathTime[i] + " C(P,X) = " + maxFlow[i]);
             if (maxFlow[i] > 0){
                 result[i] = pathTime[i] + (d / maxFlow[i]);
             }
@@ -309,11 +319,9 @@ public class MFN {
         double[][] result = new double[N][arCDF.length];
         for (int i = 0; i < N; i++){
             for  (int j = 0; j < arCDF.length; j++){
-                // TODO spytac sie czy mozna uzyc random
                 double random = r1.nextDouble();
                 for (int k = 0; k < arCDF[j].length; k++){
                     if (arCDF[j][k] <= random){
-                        // TODO moze zmienic
                         result[i][j] = (k + 1) * C[j];
                     }
                 }
